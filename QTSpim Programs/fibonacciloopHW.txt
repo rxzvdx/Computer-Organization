@@ -1,0 +1,74 @@
+.data
+
+A: .word 0 1 2 3 4 5 6 7 8 9
+i: .word 4 # start index in A	
+
+
+msg1:   .asciiz "the result is:"
+nLine: 	.asciiz "\n"		
+
+.text
+.globl main
+
+main:
+
+# load registers for array A
+la	$s0, A		# load address of A
+
+lw	$s2, i		# load word i into s2
+
+
+# initialize counters to get A[i]
+sll $s6, $s2, 2			
+add $s6, $s6, $s0		# address of A[i]
+	# load A[i]
+lw $a0, 0($s6)
+# iteratively grab successive elements of A
+
+add $t0, $zero ,$zero #0
+addi $t1, $zero ,1    #1
+
+addi $a1, $a0, -2
+slt $t2, $a1, $zero
+bne $t2, $zero, end 
+Loop:
+	# loop through A, check index bounds
+	# if (A[i] <  0), $t0 = 1
+	slt $t2, $a1, $zero
+	bne $t2, $zero, end 
+	add $a0, $t0 ,$t1
+	add $t0, $t1 ,$zero
+	add $t1, $a0 ,$zero
+	addi $a1, $a1, -1
+
+
+
+	# loop again
+	j Loop
+
+end:
+jal fact_print
+ori $v0, $zero, 10        	#exit
+syscall
+
+
+
+
+fact_print:
+	add $t0, $a0 ,$zero	
+	li $v0, 4
+	la $a0, msg1     # argument: string
+	syscall         # print the string
+
+	la $a0, nLine	# argument: new line string
+	syscall         # print the string
+
+	li $v0, 1
+	add $a0, $t0, $zero     # argument: integer
+	syscall         # print the string
+
+	li $v0, 4
+	la $a0, nLine	# argument: new line string
+	syscall         # print the string
+
+	jr $ra

@@ -1,0 +1,102 @@
+.data
+
+A: .word 0 1 2 3 4 5 6 7 8 9
+i: .word 0 # start index in A
+g: .word 4 # how many indices in A	
+
+
+msgannounce:   	.asciiz "the result for factorials are:"
+msgresults:		.asciiz "                   "
+nLine: 	.asciiz "\n"		
+
+.text
+.globl main
+
+main:
+
+# load registers for array A
+la	$s0, A		# load address of A
+la	$s1, msgresults	# load address of msgresults
+lw	$s2, i		# load word i into s2
+lw	$s4, g		# load word g into s3
+
+# initialize counters to get A[i]
+sll $s6, $s2, 2			
+add $s6, $s6, $s0		# address of A[i]
+sll $s3, $s2, 1	
+add $s5, $s3, $s1		# address of msgresults
+
+add $s4, $s4, $s2 #we should stay below i+g
+
+# iteratively grab successive elements of A
+Loop:
+	# loop through A, check index bounds
+	# if (i <  g), $t0 = 1
+	slt $t0, $s2, $s4
+
+	beq $t0, $zero, end 
+
+	# load A[i]
+	lw $a0, 0($s6)
+	# now call fact
+
+	jal fact
+	# convert v0 to an ascii character
+	addi $v0, $v0, 48
+	#store character into msg[2i]
+	sb $v0, 0($s5)
+
+	# update the index
+	addi $s2, $s2, 1 	# i++ 
+
+	# update the addresses
+	addi $s6, $s6, 4 	# addr(A[i]) += 4
+	addi $s5, $s5, 2
+
+	# loop again
+	j Loop
+
+end:
+jal fact_print
+ori $v0, $zero, 10        	#exit
+syscall
+
+fact:
+#The first time fact is called, sw saves an address in the program that called it
+	addi $sp, $sp, -8 # adjust stack for 2 items
+	sw $ra, 4($sp) # save the return address
+	sw $a0, 0($sp) # save the argument n
+	slti $t0,$a0,1 # test for n < 1
+	beq $t0,$zero,L1 # if n >= 1, go to L1
+# n LESS THAN 1  ------> every n will reach this point
+	addi $v0,$zero,1 # return 1
+	addi $sp,$sp,8 # pop 2 items off stack
+	jr $ra # return to caller
+
+L1: 	addi $a0, $a0, -1 # n >= 1: argument gets (n – 1)
+	jal fact # call fact with (n –1)
+	lw $a0, 0($sp) # return from jal: restore argument n
+	lw $ra, 4($sp) # restore the return address
+	addi $sp, $sp, 8 # adjust stack pointer to pop 2 items
+# We assume a multiply instruction is available, even though it is not covered until Ch 3
+	mul $v0,$a0,$v0 # return n * fact (n – 1)
+#fact jumps again to the return address:
+	jr $ra # return to the caller
+
+
+fact_print:	
+	li $v0, 4
+	la $a0, msgannounce     # argument: string
+	syscall         # print the string
+
+	la $a0, nLine	# argument: new line string
+	syscall         # print the string
+
+
+	la $a0, msgresults     # argument: string
+	syscall         # print the string
+
+	la $a0, nLine	# argument: new line string
+	syscall         # print the string
+
+	jr $ra

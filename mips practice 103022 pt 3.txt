@@ -1,0 +1,44 @@
+.data
+
+
+Ryan: .asciiz "Ryan\n" 
+Tammi: .asciiz "Tammi\n"
+Blake: .asciiz "Blake\n"
+Josh: .asciiz "Josh\n"
+
+#index in asm is by 4s
+#size of this program is 4 x 4, 4 bytes times 4 list objs = 16
+
+names: .word Ryan, Tammi, Blake, Josh # array[x] = [Ryan, Tammi, Blake, Josh]
+
+iterator:   .word 0
+size: 		.word 3 #0,1,2,3 is four elements so 0-3 = size of 4
+
+.text
+main:
+
+la $t0, names
+lw $t1, iterator
+lw $t2, size
+
+#system.println(names[i])
+
+begin_loop:
+#if iterator < size
+bgt $t1, $t2, exit_loop #if t1 > size then EXIT
+#else, if not true execute:
+sll $t3, $t1, 2 #multiplies iterator by 2^2 or 4, and stores it in t3
+#t3 = 4 X I
+
+addu $t3, $t3, $t0 
+#t3 or 4I = 4I + memory location of the name array ---> 1000 + 4 = 1004 or second element in array
+
+li $v0, 4
+lw $a0, 0($t3)
+syscall
+
+addi $t1, $t1, 1 #increment iterator
+
+j begin_loop #jump instruction over and over until condiiton is satisfied
+
+exit_loop:

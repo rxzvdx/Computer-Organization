@@ -1,0 +1,67 @@
+# A simple in-class exercize to illustrate an overflow on unsigned numbers
+.data
+
+A: .word 832040 1346269 2178309 3524578 5702887 9227465 14930352 24157817 39088169 63245986 102334155 165580141 267914296 433494437 701408733 1134903170 1836311903 2971215073
+i: .word 16 # start index in A
+g: .word 20  # how many words to collect from A counting from i  #then change g to 12
+k: .word 17 # how many words total in A
+msgoverflow:    .asciiz  "overflow!" 
+.text
+.globl main
+
+main:
+
+# load registers for array A
+la	$s0, A		# load address of A
+lw	$s1, i		# load word i into s1
+lw	$s2, g		# load word g into s2
+lw	$s3, k		# load word g into s3
+
+
+# initialize address of A[i]
+sll $s6, $s1, 2			
+add $s6, $s6, $s0
+
+#initialize a register where you will compute the sum of the elements
+
+add $s4, $zero, $zero
+lw $a0, 0($s6)
+add $a1, $s4, $zero
+jal ifoverflow
+bne $v0, $zero, end
+addu $s4, $s4, $a0
+addi $s6, $s6, 4
+lw $a0, 0($s6)
+add $a1, $s4, $zero
+jal ifoverflow
+bne $v0, $zero, end
+addu $s4, $s4, $a0
+
+
+end:
+beq $v0, $zero, nend
+la $a0, msgoverflow
+ori $v0, $zero, 4        	#exit
+syscall
+nend:
+addu $a0, $s4, $zero
+ori $v0, $zero, 1        	#exit
+syscall
+#then exit
+ori $v0, $zero, 10        	#exit
+syscall
+
+ifoverflow:
+
+	addu	$t0, $a0, $a1     # $t0 <= sum of $a0 and $a1
+	nor	$t3, $a0, $zero   # $t3 = NOT $a0 
+	sltu	$t3, $t3, $a1        # $t3 = 1 if $t3 < $a1	
+		# Overflow if $a0 + $a1 > (2^32 - 1)  # $t3 = 1  overflow
+	bne	$t3, $zero, Overflow
+
+	add	$v0, $zero $zero
+	jr $ra
+
+	Overflow:
+	addi	$v0, $zero 1
+	jr $ra

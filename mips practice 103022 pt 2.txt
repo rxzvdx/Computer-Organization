@@ -1,0 +1,35 @@
+.data
+
+names: .space 16 #allocated 16 bytes of storage, each word takes up 4 bytes 4x4 = 16
+Ryan: .asciiz "Ryan\n" 
+Tammi: .asciiz "Tammi\n"
+Blake: .asciiz "Blake\n"
+Josh: .asciiz "Josh\n"
+
+
+
+
+.text
+main:
+
+la $t0, names #load address of names in t0 reg
+
+la $t1, Ryan
+sw $t1, 0($t0) #stores t1 in first instance of t0 (array), which is 0 in memory location
+
+la $t1, Tammi
+sw $t1, 4($t0) # 4 because tammi is second in array [0,4,8,12] <- their memory location
+
+la $t1, Blake #8 out of [0,4,8,12]
+sw $t1, 8($t0)
+
+la $t1, Josh #12 out of [0,4,8,12]
+sw $t1, 12($t0)
+#address locations for names are [0,4,8,12]
+
+#Printing ith element
+
+li $v0, 4 #print a string to the users console
+lw $a0, 4($t0) #load address of word at offset of 4 bytes and store it in a0
+#above prints Tammi
+syscall

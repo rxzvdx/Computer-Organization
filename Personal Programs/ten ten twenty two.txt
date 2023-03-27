@@ -1,0 +1,28 @@
+. data
+A: .word 10 11 12 13 14 15 16  	#contents of array A
+i: .word 2 						#index to load
+f: .word 7 						#size of array
+
+B:.word 17 18 19 20
+j:.word 1 						#index to load
+g:.word 4 						#size of array
+
+.text
+.globl main
+
+main:
+
+la $s0, A
+la $s1, B
+lw $s2, i
+lw $s3, j
+lw $s4, f
+lw $s5, g
+
+sll $s6, $s2, 2 				#Start of A X 4
+add $t0, $s0, $s6 				#address A[start A]
+sll $s7, $s3, 2  				#Start of B X 4
+add $t1, $s1, $s7				#address B[start B]
+
+lw $t2, 0($t0)					#takes content of word(s)
+sw $t2, 0($t1)					#stores word(s) in array

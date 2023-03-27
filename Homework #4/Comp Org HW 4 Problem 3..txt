@@ -1,0 +1,30 @@
+Push 								Pop
+$ra: 400018		lw $a0, n			$a0: 1				
+$a0: 3								$ra: 0
+$ra: 400030		sw $ra, 4($sp)		$a0:	 										
+$a0: 			sw $a0, n($sp)		$ra: 400018 	
+$ra: 400068		sw $ra, 4($sp)		$a0: 3
+$a0: 2 			lw $a0, n($sp)		$ra: 400068
+$ra:			lw $ra, 4($sp)		$a0: 2
+$a0: 1			lw $a0, n($sp)		$ra:
+$ra:			lw $ra, 4($sp)		$a0: 1
+$a0: 0			lw $a0, n($sp)		$ra:
+$ra:			lw $ra, 4($sp)		$a0: 0
+$a0: 1			lw $a0, n($sp)		$ra:
+$ra:			lw $ra, 4($sp)		$a0: 1
+$a0: 2			lw $a0, n($sp)		$ra:
+$ra: 			lw $ra, 4($sp)		$a0: 2
+$a0: 3			lw $a0, n($sp)		$ra: 400068
+$ra: 400030		lw $ra, n($sp)		$a0: 3
+$a0: 6			la $a0, msg			$ra: 400030
+$ra: 400038							$a0: 6
+$a0: 10010004	la $a0, nLine		$ra:
+$ra:								$a0: 10010004
+$a0: 10010011	li $v0, 4			$ra:
+$ra:								$a0: 10010011
+$a0: 6 			la $v0, 4			$ra:
+end of program
+
+
+
+#NOTE: whenever there are no values for $ra or $a0, it means the value remained the same at that point

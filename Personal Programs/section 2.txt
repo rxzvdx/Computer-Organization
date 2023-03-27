@@ -1,0 +1,25 @@
+.text
+.globl main
+
+main:
+
+la 	$s0, A 				#load address zero is base address 
+lw 	$s1, ii 			#load word
+lw 	$s2, g
+
+sll $s1, $s1, 2   		#shift left logical
+
+add     $t0, $s1, $s0                    
+
+lw      $t1, 0($t0) 	#temporary registers
+add     $t0, $t1, $s2
+
+sw      $t0, 40($s0) 	#store word
+#offset address designates place in memory where t0 is stored
+
+ori $v0, $zero, 10 		#moving to zero makes up for lack of move op. 
+syscall
+
+
+
+ 

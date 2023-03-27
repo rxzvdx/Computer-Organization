@@ -1,0 +1,53 @@
+.data
+
+n: .word 3 #n argument for number of elements
+k: .word 2 # k argument for the size of a combination
+
+mgs1: .asciiz "n:"
+mgs2 .asciiz "k:"
+mgs3: .asciiz "Combinations without repetitions:"
+nLine: .asciiz "\n"\
+
+.text
+.globl main
+
+main:
+lw $a0, n
+lw $a1, k
+
+jal comb
+#move the result into a0
+add $a2, $v0, $zero
+jal comb_printing
+
+ori $v0, $zero, 10 #exit
+syscall
+
+comb:
+	sub $sp, $sp, 16 #4 words in stack 4x4 = 16
+	sw $ra, 0($sp)
+	sw $s0, 4($sp) #save registers used inside must be saved
+	sw $a0, 8($sp) #because fact will ruin $a0
+	sw $a1, 12($sp)	#because we will need it for another call
+	jal fact
+	
+	move $s0, $v0
+	lw $a0, 12($sp) #get k
+	jal fact
+	
+	div $s0, $s0, $v0 #n!/k!
+	lw $a0, 8($sp)
+	lw $a1, 12($sp)
+	sub $a0, $a0, $a1 #n-k
+	jal fact
+	div $s0, $s0,, $v0 #n!/(k!(n-k)!)
+	move $v0, $s0
+	
+	lw $ra, 0($sp)
+	lw $s0, 4($sp)
+	lw $s1, 8($sp)
+	lw $a1, 12($sp)
+	addi $sp, $sp, 16
+	jr $ra
+
+comb_printing:

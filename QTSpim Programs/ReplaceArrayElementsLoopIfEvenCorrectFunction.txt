@@ -1,0 +1,83 @@
+.data
+
+A: .word 10 11 12 13 14 15 16 17 18 19 20 21 22 23 24
+i: .word 7
+B: .word 40 45 50 55 60 65
+k: .word 2
+f: .word 15		# length of A
+g: .word 6			# length of B
+
+.text
+.globl main
+
+main:
+
+# load registers for array A
+la	$s0, A		# load address of A
+lw	$s2, i		# load word i into s2
+lw	$s4, f		# load word f into s4
+
+# load registers for array B
+la	$s1, B		# load address of B
+lw	$s3, k		# load word k into s3
+lw	$s5, g		# load word g into s5
+
+# initialize counters to get A[i]
+sll $s6, $s2, 2			
+add $s6, $s6, $s0		# address of A[i]
+
+# initialize counters to get B[k]
+sll $s7, $s3, 2			
+add $s7, $s7, $s1		# address of B[k]
+
+# iteratively replace elements of B with corresponding elements of A
+Loop:
+
+	# loop through A, check index bounds
+	# if (i <  f), $t0 = 1
+	# if (i >= f), $t0 = 0
+	slt $t0, $s2, $s4
+	beq $t0, $zero, end 
+
+	# loop through B, check index bounds
+	# if (k <  g), $t0 = 1
+	# if (k >= g), $t0 = 0
+	slt $t0, $s3, $s5 
+	beq $t0, $zero, end 
+
+	# load A[i]
+	lw $a0, 0($s6)
+	
+	jal EvenCorrect
+	ori $t0, $v0, 0
+	
+
+	sw $t0, 0($s7)
+
+	# update of the indices
+	addi $s2, $s2, 1 	# i++ 
+	addi $s3, $s3, 1 	# k++ 
+
+	# update the address
+	addi $s6, $s6, 4 	# addr(A[i]) += 4
+	addi $s7, $s7, 4 	# addr(B[k]) += 4 
+
+	# loop again
+	j Loop
+
+end:
+ori $v0, $zero, 10        	#exit
+syscall
+
+EvenCorrect:
+	# if A[i] is even, increment by 1 and store into B[k]
+	srl $t5, $a0, 1			# shift right
+	sll $t5, $t5, 1			# shift left
+	sub $t5, $a0, $t5		# remainder
+	
+	# if remainder = 0; A[i]++
+	bne $t5, $zero, Exit
+	addi $a0, $a0, 1
+
+Exit:   add  $v0, $a0, $zero
+	jr $ra

@@ -1,0 +1,26 @@
+comb:           
+ sub $sp, $sp, 16
+ sw $ra , 0($sp) # because we are calling other functions within this one 
+ sw $s0, 4($sp)  #save registers used inside must be saved
+ sw $a0, 8($sp)  #because fact will ruin a0
+ sw $a1, 12($sp) #because we will need it for another call
+ jal fact  
+# move is a pseudo-instruction
+#you are allowed to use it after you show me 
+#once how to move to register using a real MIPS instruction     
+ move $s0, $v0  
+ lw $a0, 12($sp) # get k
+ jal fact       
+ div $s0, $s0, $v0 # n!/k!
+ lw $a0, 8($sp)  
+ lw $a1, 12($sp) 
+ sub $a0, $a0, $a1  # n-k
+ jal fact       
+ div $s0, $s0, $v0 # n!/(k!(n-k)!)
+ move $v0, $s0  
+ lw  $ra, 0($sp) 
+ lw  $s0, 4($sp) 
+ lw  $a0, 8($sp) # this is not necessary - nobody expects a0-a3... 
+ lw  $a1, 12($sp) #... to be preserved for the caller, so you may skip
+ addi $sp, $sp, 16 #... the ladst 2 lw-s
+ jr $ra         

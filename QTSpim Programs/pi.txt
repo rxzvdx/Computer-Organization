@@ -1,0 +1,30 @@
+.data
+
+pi: .float 3.14159
+
+newline: .asciiz "\n"
+
+.text
+.globl main
+
+main:
+
+
+li.s	$f1, 3.14159		# load pi
+l.s	$f2, pi
+
+mov.s $f12,$f1
+li $v0, 2
+syscall
+
+la $a0, newline
+ori $v0, $zero, 4        	#remember the li is actually a pseudo instruction (this is li $v0,4)
+syscall
+
+mov.s $f12,$f2
+li $v0, 2
+syscall
+
+#then exit
+ori $v0, $zero, 10        	#exit
+syscall

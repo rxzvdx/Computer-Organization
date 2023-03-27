@@ -1,0 +1,46 @@
+# Quiz example from Section3
+
+.text
+.globl main
+
+main:
+la	$s0, A	
+lw	$s1, ii
+lw	$s2, g
+
+lw $t1, 20($s0)   
+
+sub $t0, $s2, $t1   
+
+sll $s1, $s1,2    
+add $t1, $s1, $s0    
+
+sw  $t0, 0($t1)
+
+#---Just printing to the console ---------------------  
+		
+li $v0, 4
+la $a0, msg     # argument: string
+syscall         # print the string
+
+la $a0, nLine	# argument: string
+syscall         # print the string
+
+# Print integer
+li $v0, 1
+add $a0, $t0, $zero
+syscall
+
+#---End of printing to the console ---------------------  		
+
+ori $v0, $zero, 10        	#exit
+syscall
+
+
+.data
+
+A: .word 10 11 12 13 14 15 16 17 18 20 21 22 23 24
+ii: .word 2
+g:  .word 5
+msg:   	.asciiz "Section 3 result:"
+nLine: 	.asciiz "\n"

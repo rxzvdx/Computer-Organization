@@ -1,0 +1,81 @@
+.data
+
+g: .word 100
+h: .word 70
+i: .word 60
+j: .word 30
+
+msg1: .asciiz "let us show how we call a function:"
+msg2: .asciiz "leaf_example result:
+nLine: .asciiz "\n"
+
+
+.text
+.globl main
+
+main:
+#we want to call leaf_example with arguments g,h,i,k
+#we place g, h, i, k, into a0-a3 for the function call
+lw		$a0, g 			#load argument g
+lw		$a1, h			#load argument h
+lw		$a2, i 			#load i
+lw		$a3, k 			#load k
+
+#but now we need a a0 for something else so we will move it to s0
+		add $s0, $a0, $zero
+		
+		li $v0, 4
+		la $a0, msg1	#argument: string
+		syscall			#print the string
+		
+		la $a0, nLine	#argument: String
+		syscall 		#print the string
+		#now move s0 back to a0
+		add $a0, $s0, $zero
+		
+		jal leaf_example 		#call function
+		add $t0, $zer0, $v0		#move the results of leaf_example into $t0
+		
+		#print the announcement of the result
+		
+		li $v0, 4
+		la $a0, msg2	#argument: string
+		syscall			#print the string
+		
+		la $a0, nLine 	#argument: string
+		syscall			#print the String
+		
+		#print the result
+		li $v0, 1
+		add $a0, $t0, $zero
+		syscall
+		
+		ori $v0, $zero, 10
+		syscall
+		
+leaf_example:
+	addi $sp, $sp, -32
+	sw   $s0, 0($sp)		#save $s0 on stack
+	sw   $s1, 4($sp)		#save $s1 on stack
+	sw   $s2, 8($sp)		#save $s2 on stack
+	sw   $s3, 12($sp)		#save $s3 on stack
+	sw   $s4, 16($sp)		#save $s4 on stack
+	sw   $s5, 20($sp)		#save $s5 on stack
+	sw   $s6, 24($sp)		#save $s6 on stack
+	sw   $s7, 28($sp)		#save $s7 on stack
+	
+	add  $t0, $a0, $a1 
+	add  $t1, $a2, $a3
+	sub  $s0, $t0, $t1		#procedure body
+	add  $v0, $s0, $zero 	#result
+	
+	lw   $s7, 28($sp)
+	lw   $s6, 24($sp)	
+	lw   $s5, 20($sp)
+	lw   $s4, 16($sp)
+	lw   $s3, 12($sp)
+	lw   $s2, 8($sp)		
+	lw	 $s1, 4($sp)
+	lw   $s0, 0($sp)
+	addi $sp, $sp, 		#restore $s0
+	jr   $ra				#return

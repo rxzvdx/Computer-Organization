@@ -1,0 +1,27 @@
+
+
+
+
+
+
+end: 
+	addu $a0, $s4, $zero
+	ori $v0, $zero, 1 				#exit
+	syscall
+	ori $v0, $zero, 10 				#exit
+	syscall
+
+ifOverflow:
+	addu $t0, $a0, $a1				# t0 <= sum of $a0 and $a1
+	nor $t3, $a0, $zero				# t3 = NOT $a0
+	sltu $t3, $t3, $a1				# t3 = 1 if $t3 < $a1
+									# overflow if $a0 + $a1 > (2^32 - 1) 
+									# $t3 = 1 overflow
+	bne $t3, $zero, Overflow
+	
+	add $v0, $zero, $zero
+	jr $ra
+	
+	Overflow:
+	addi $v0, $zero, 1
+	jr $ra

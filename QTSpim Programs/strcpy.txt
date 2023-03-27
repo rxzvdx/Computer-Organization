@@ -1,0 +1,48 @@
+.data
+
+
+i: .word 0 # start index in msg1
+	
+
+
+msg1:   	.asciiz "copy this"
+msg2:   	.asciiz "this is   to print !!"
+#"copy this '\0' to print !!"
+nLine: 	.asciiz "\n"		
+
+.text
+.globl main
+
+main:
+
+# load registers for array A
+la	$a1, msg1		# load address of A
+la	$a0, msg2		# load address of A
+lw	$s0, i		# load word i into s0
+
+jal strcpy
+li $v0, 4
+la $a0, msg2     # argument: string
+syscall         # print the string
+
+end:
+ori $v0, $zero, 10        	#exit
+syscall
+
+
+strcpy:
+	addi $sp, $sp, -4 # adjust stack for 1 more item
+	sw $s0, 0($sp) # save $s0
+	add $s0,$zero,$zero # i = 0 + 0
+L1:	add $t1,$s0,$a1 # address of y[i] in $t1
+	lbu $t2, 0($t1)
+	add $t3,$s0,$a0 # address of x[i] in $t3
+#PLAY WITH COPYING to x[i] BEFORE AND AFTER 'beq for jumping out of the loop'
+	sb $t2, 0($t3) # x[i] = y[i]
+	beq $t2,$zero,L2 # if y[i] == 0, go to L2	
+	addi $s0, $s0,1 # i = i + 1
+	j L1 # go to L1
+L2:	lw $s0, 0($sp) # y[i] == 0: end of string.
+	addi $sp,$sp,4 # pop 1 word off stack
+	jr $ra # return
+

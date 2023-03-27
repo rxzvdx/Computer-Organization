@@ -1,0 +1,57 @@
+.data 
+ 
+A: 		 .word 832040 1346269 2178309 3524578 5702887 9227465 14930352 24157817 39088169 63245986 102334155 165580141 267914296 433494437 701408733 1134903170 1836311903 
+i: 		 .word 4 									# start index in A 
+g: 		 .word 6									# how many words to collect from A counting from i  #then change g to 12 
+k:		 .word 17 									# how many words total in A 
+counter: .word 0									# counter
+
+.text 
+.globl main 
+ 
+main: 
+ 
+# load registers for array A 
+	la $s0, A  					# load address of A 
+	lw $s1, i  					# load word i into s1 
+	lw $s2, g  					# load word g into s2 
+	lw $s3, k  					# load word k into s3 
+	lw $s5, counter  			# load counter into s5
+# initialize address of A[i] 
+	sll $s6, $s1, 2				
+	add $s6, $s6, $s0			# address of A[i]
+# initialize a register where you will compute the sum of the elements 
+	add $s4, $zero, $zero		# answer register
+ 
+Loop: 
+# check index bounds, have you reached the end of A 
+	slt $t0, $s1, $s3			# if i < k, end
+	beq $t0, $zero, end  			# break for if i < k
+# check index bounds, have you collected g words 
+	slt $t1, $s5, $s2			# if counter < g, end
+	beq $t1, $zero, end			# break for if counter < g
+# if any of these TRUE, then jump out 
+	lw $t2, 0($s6) 				# load A[i] 
+# in the loop iteratively grab successive elements of A and add to the sum 
+# add the loaded word content to the sum (USE addu for addition) 
+	addu $s4, $s4, $t2			# add A[i] to sum
+ # update the index  (you need it for the entrance checks) 
+ 	addi $s1, $s1, 1			# i += 1
+	addi $s5, $s5, 1			# counter += 1
+ # update the address of A[i] 
+ 	addi $s4, $s4, 4			# addr A[i] += 4
+ # loop again 
+	j Loop 
+ 
+#print result: move the sum register into a0 for that 
+	
+#then exit 
+end:	
+	li 		$v0, 1					# prepare syscall
+	add 	$a0, $s4, $zero			# add answer to $a0
+	syscall							# print the string	
+	
+	ori 	$v0, $zero, 10			# exit
+	syscall
+
+ 

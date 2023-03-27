@@ -1,0 +1,43 @@
+.data
+A: .word 10 11 12 13 14 15 16  	#contents of array A
+i: .word 2 						#index to load
+f: .word 7 						#size of array
+
+B:.word 17 18 19 20
+k:.word 1 						#index to load
+g:.word 4 						#size of array
+
+.text
+.globl main
+
+main:
+
+la $s0, A
+la $s1, B
+lw $s2, i
+lw $s3, k
+lw $s4, f
+lw $s5, g
+
+sll $s6, $s2, 2 				#Start of A X 4
+add $s6, $s6, $s0				#address A[start A]
+sll $s7, $s7, 2  				#Start of B X 4
+add $s7, $s7, $s1				#address A[start B]
+
+lw $a0, 0($s6)					#get/copy A[startA] into $a0
+sw $a0, 0($s7)					#B[startB] = A[startA]
+
+slt $t0, $s2, $s4				#
+beq $t0, $zero, end				#
+slt $t0, $s3, $s5				#
+beq $t0, $zero, end				#
+
+addi $s7, $s7, 4				#
+addi $s6, $s6, 4				#
+
+addi $s3, $s3, 1				#
+addi $s2, $s2, 1				#
+j loop							#
+
+ori $v0, $zero, 10 #exit
+syscall

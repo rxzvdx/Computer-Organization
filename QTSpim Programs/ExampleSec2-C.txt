@@ -1,0 +1,28 @@
+
+.text
+.globl main
+
+main:
+la	$s0, A	
+lw	$s1, ii
+lw	$s2, g
+
+sll $s1, $s1,2   
+
+add     $t0, $s1, $s0                    
+
+lw      $t1, 0($t0)           
+add     $t0, $t1, $s2
+
+sw      $t0, 40($s0) 
+ 		
+
+ori $v0, $zero, 10        	#exit
+syscall
+
+
+.data
+
+A: .word 10 11 12 13 14 15 16 17 18 20 21 22 23 24
+ii: .word 2
+g:  .word 5

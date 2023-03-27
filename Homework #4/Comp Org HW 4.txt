@@ -1,0 +1,39 @@
+.data
+# problem 1
+
+n: .word 0 				# n argument for int n
+
+.text
+.globl main
+
+main:
+
+lw $a0, n #load 0 into $a0, will be used to check validity
+addi $a1, $a0, -2 #(n-2) will use later in loop
+
+# move the result into v0
+add $v0, $a0, $zero
+
+addi $t0, $zero, 0 		#load 0 into $t0, this is zero VALUE
+addi $t1, $zero, 1		#load 1 into $t1, this is one VALUE
+addi $a1, $a0, -2		#n counter
+
+bne $a0, $t0, Loop
+
+Loop:
+	addi $sp, $sp, -12 	#make room in stack for 3 items of 4 bytes each
+	sw $a0, 0($sp) 
+	sw $v0, 4($sp)
+	sw $t0, 8($sp)
+	sw $ra, ($sp)
+	
+	slt $a0, $a0, $t1, #if n < 1 (n == 0), return 0, else (if n == 1) return 1
+	jr $ra
+	addi $s0, $a0, -1 	#f(n-1)
+	addi $v0, $a2, -2 	#f(n-2)
+	
+	add $v0, $s0, $v0	#f(n-1) + f(n-2)
+	add $a1, $a1, 1 	#add 1 to a1
+	j Loop
+
+syscall

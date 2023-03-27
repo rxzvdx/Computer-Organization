@@ -1,0 +1,59 @@
+# illustrating an incorrect approach of treating floating point as integers
+# it results in a wrong summation result
+.data
+
+A: .float 4.0 5.0 6.0 7.0 8.0 9.0 10.0 11.0 12.0 
+
+i: .word 4 # start index in A
+g: .word 4  # how many words to collect from A counting from i  #then change g to 12
+k: .word 9 # how many words total in A
+msgoverflow:    .asciiz  "overflow!" 
+.text
+.globl main
+
+main:
+
+# load registers for array A
+la	$s0, A		# load address of A
+lw	$s1, i		# load word i into s1
+lw	$s2, g		# load word g into s2
+lw	$s3, k		# load word g into s3
+
+
+# initialize address of A[i]
+sll $s6, $s1, 2			
+add $s6, $s6, $s0
+
+#initialize a register where you will compute the sum of the elements
+add $s4, $zero, $zero
+add $s2, $s2, $s1
+
+# in the loop iteratively grab successive elements of A and add to sum
+
+Loop:
+# loop through A, check index bounds 
+	slt $t0, $s1, $s3 #$t0 <- 1 if (startA < sizeA), $t0 <- 0 if (startA >= sizeA) 
+	beq $t0, $zero, end
+	slt $t0, $s1, $s2 #$t0 <- 1 if (startA < startA+g), $t0 <- 0 if (startA >= sizeA) 
+	beq $t0, $zero, end  
+# load A[i] 
+	lw $a0, 0($s6)
+
+	# add the loaded word content to the sum (USE addu for addition)
+	addu $s4, $s4, $a0
+	# update the index  (you need it for the entrance checks)
+	addi $s1, $s1, 1
+	# update the address of A[i]
+	add $s6,$s6, 4
+
+	# loop again
+	j Loop
+
+end:
+addu $a0, $s4, $zero
+ori $v0, $zero, 1        	#exit
+syscall
+#then exit
+ori $v0, $zero, 10        	#exit
+syscall
+

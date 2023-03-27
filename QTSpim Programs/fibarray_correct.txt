@@ -1,0 +1,35 @@
+# Shows the correct addressing scheme replacing the psedo-addressing with the label
+# it calculates 40 Fibonacci numbers starting from the elements 1 and 1 (skips 0)
+
+  .data
+theArray: .space 160
+nothing: .word 255, 255, 255
+  .text
+main:
+  la $s0, theArray          #use the array label only here (this is also pseudo, but limited to one occurrence)
+  li    $t6, 1              # Sets t6 to 1
+  li    $t7, 4              # Sets t7 to 4
+  #sw    $t6, theArray($0)   # Sets the first term to 1
+  sw    $t6, 0($s0)   # Sets the first term to 1
+  add 	$s1, $s0, $t7
+  #sw    $t6, theArray($t7)  # Sets the second term to 1
+  sw    $t6, 0($s1)  # Sets the second term to 1
+  li    $t0, 8              # Sets t0 to 8
+loop:
+  addi  $t3, $t0, -8
+  addi  $t4, $t0, -4
+  #lw    $t1, theArray($t3)  # Gets the last
+  #lw    $t2, theArray($t4)  #   two elements
+  add   $s3, $s0, $t3
+  add   $s4, $s0, $t4
+  lw    $t1, 0($s3)  # Gets the last
+  lw    $t2, 0($s4)  #   two elements
+  add   $t5, $t1, $t2       # Adds them together...
+  #sw    $t5, theArray($t0)  # ...and stores the result
+  add   $s5, $s0, $t0
+  sw	$t5, 0($s5)
+  addi  $t0, $t0, 4         # Moves to next "element" of theArray
+  blt   $t0, 160, loop      # If not past the end of theArray, repeat
+
+ori $v0, $zero, 10
+syscall

@@ -1,0 +1,107 @@
+# A simple in-class exercize to illustrate an overflow on unsigned numbers 
+# by checking the margin between the current sum and the largest unsigned number (Big)
+.data
+A: .word 832040 1346269 2178309 3524578 5702887 9227465 14930352 24157817 39088169 63245986 102334155 165580141 267914296 433494437 701408733 1134903170 1836311903 2971215073
+i: .word 4 # start index in A
+g: .word 20  # how many words to collect from A counting from i  #then change g to 12
+k: .word 18 # how many words total in A
+
+#create number 2^32 -1
+#nor $a0, $zero, $zero
+Big: .word 4294967295
+
+#832040 + 1346269 + 2178309 + 3524578 + 5702887 + 9227465 + 14930352 + 24157817 + 39088169 + 63245986 + 102334155 + 165580141 + 267914296 + 433494437 + 701408733 + 1134903170 + 1836311903
+#4806180707
+#5702887 + 9227465 + 14930352 + 24157817 + 39088169 + 63245986 + 102334155 + 165580141 + 267914296 + 433494437 + 701408733 + 1134903170 + 1836311903
+#4798299511
+#5702887 + 9227465 + 14930352 + 24157817 + 39088169 + 63245986 + 102334155 + 165580141 + 267914296 + 433494437 + 701408733 + 1134903170 
+#2961987608
+#4294967295 - 2961987608 = 1332979687
+
+msgoverflow:    .asciiz  "overflow at index: " 
+nLine: 	.asciiz "\n"	
+
+.text
+.globl main
+
+main:
+
+# load registers for array A
+la	$s0, A		# load address of A
+lw	$s1, i		# load word i into s1
+lw	$s2, g		# load word g into s2
+lw	$s3, k		# load word g into s3
+
+lw $a0, Big
+
+# initialize address of A[i]
+sll $s6, $s1, 2			
+add $s6, $s6, $s0
+
+#set the index boundary for the last word you want to load
+add $s2, $s2, $s1
+
+#initialize a register where you will compute the sum of the elements
+addu $a1, $zero, $zero
+
+
+Loop:
+	slt $t0, $s1, $s3 #$t0 <- 1 if (i < sizeA), $t0 <- 0 if (startA >= sizeA) 
+	beq $t0, $zero, end
+	slt $t0, $s1, $s2 #$t0 <- 1 if (i < startA+g), $t0 <- 0 
+	beq $t0, $zero, end  
+	jal get_margin
+	#v0 contains the margin
+	lw $t1, 0($s6) #get the next summand
+	addiu $t2, $t1, 1
+	sltu $t0, $t2, $v0 #compare the margin with the new value to add
+	beq $t0, $zero, overflow  #if the value is larger that the margin, that's overflow		
+	addu $a1, $a1, $t1
+	# update the index  (you need it for the entrance checks)
+	addi $s1, $s1, 1
+	# update the address of A[i]
+	add $s6,$s6, 4
+
+j Loop
+
+
+overflow:	
+	la $a0, msgoverflow
+	ori $v0, $zero, 4        	#exit
+	syscall
+	add $a0, $s1, $zero
+	ori $v0, $zero, 1        	#exit
+	syscall
+	ori $v0, $zero, 10        	#exit
+	syscall
+
+
+end:
+	addu $a0, $a1, $zero
+	ori $v0, $zero, 1        	#exit
+	syscall
+#then exit
+	ori $v0, $zero, 10        	#exit
+	syscall
+
+
+
+get_margin: #returns the margin (Big - sum = a0 - a1)
+	sw $a0, 0($sp) # save the big
+	subu $a3, $a0, $a1
+	addu $a0, $a3, $zero
+	ori $v0, $zero, 1        	#print integer
+	syscall
+	la $a0, nLine
+	ori $v0, $zero, 4        	#print new line
+	syscall	
+	mtc1 $a3, $f12			#convert to fp
+	cvt.s.w $f12, $f12
+	li $v0, 2			#print fp
+	syscall
+	la $a0, nLine
+	ori $v0, $zero, 4        	#print new line
+	syscall	
+	addu $v0, $a3, $zero
+	lw $a0, 0($sp) # save the big
+	jr $ra
